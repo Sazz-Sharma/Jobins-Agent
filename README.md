@@ -13,22 +13,7 @@ A robust, budget-aware AI agent that operates under strict resource limits (**10
 
 The agent follows a **4-layer isolated architecture** where no component directly talks to the LLM or tools — every interaction is mediated through dedicated guardrail layers:
 
-```
-┌─────────────────────────────────────────────────────┐
-│                   main.py (CLI)                     │
-├─────────────────────────────────────────────────────┤
-│              Orchestrator (ReAct Engine)             │
-│   ┌──────────┐  ┌────────────┐  ┌────────────────┐ │
-│   │ Sentinel │──│   Ledger   │  │ Tool Registry  │ │
-│   │ (Budget  │  │ (Append-   │  │ (Timeout       │ │
-│   │  Proxy)  │  │  Only Log) │  │  Wrappers)     │ │
-│   └────┬─────┘  └────────────┘  └───┬──────┬───┬─┘ │
-│        │                            │      │   │   │
-├────────┼────────────────────────────┼──────┼───┼───┤
-│   LLM Client              WebSearch│ Code │AST│   │
-│   (Groq API)                       │ Exec │Map│   │
-└────────────────────────────────────┴──────┴───┘───┘
-```
+![JoBins Agent Architecture](architecture.svg)
 
 - **Orchestrator**: Coordinates the ReAct loop ticks, reflection, and replanning. Never touches the LLM directly.
 - **Sentinel**: Proxy wrapper that enforces call count and cost limits *before* every LLM request. Raises `BudgetExceededException` to halt execution instantly.

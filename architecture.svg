@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 650" style="background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="grad-core" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e3a8a;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad-tool" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#065f46;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad-data" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#b45309;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad-ext" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4c1d95;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Arrows -->
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b" />
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6" />
+    </marker>
+    <marker id="arrow-yellow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#f59e0b" />
+    </marker>
+
+    <!-- Filters -->
+    <filter id="shadow" x="-5%" y="-5%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Title -->
+  <text x="500" y="50" fill="#f8fafc" font-size="28" font-weight="700" text-anchor="middle">JoBins Agent Architecture</text>
+  <text x="500" y="75" fill="#94a3b8" font-size="14" font-weight="400" text-anchor="middle">Resource-Constrained Reasoning System</text>
+
+  <!-- Connections -->
+  
+  <!-- Orchestrator to Ledger -->
+  <path d="M 500 240 L 500 480" stroke="#f59e0b" stroke-width="3" stroke-dasharray="6,4" fill="none" marker-end="url(#arrow-yellow)" marker-start="url(#arrow-yellow)" />
+  <text x="515" y="370" fill="#f59e0b" font-size="12" font-weight="bold">Transactional State (R/W)</text>
+  
+  <!-- User to Orchestrator -->
+  <path d="M 500 130 L 500 180" stroke="#64748b" stroke-width="3" fill="none" marker-end="url(#arrow)" />
+
+  <!-- Orchestrator to Tool Registry -->
+  <path d="M 640 210 L 710 210" stroke="#10b981" stroke-width="3" fill="none" marker-end="url(#arrow)" />
+  <text x="675" y="200" fill="#10b981" font-size="12" text-anchor="middle">Invoke</text>
+  
+  <!-- Orchestrator to Sentinel -->
+  <path d="M 360 210 L 290 210" stroke="#3b82f6" stroke-width="3" fill="none" marker-end="url(#arrow-blue)" />
+  <text x="325" y="200" fill="#3b82f6" font-size="12" text-anchor="middle">Prompt</text>
+
+  <!-- Sentinel to LLM -->
+  <path d="M 210 240 L 210 320" stroke="#8b5cf6" stroke-width="3" fill="none" marker-end="url(#arrow)" />
+  <text x="225" y="285" fill="#8b5cf6" font-size="12">Groq Req</text>
+
+  <!-- Sentinel to Ledger -->
+  <path d="M 210 240 C 210 510, 360 510, 420 510" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4,4" fill="none" marker-end="url(#arrow-yellow)" />
+  <text x="220" y="470" fill="#f59e0b" font-size="12">Cost &amp; Call Checking</text>
+  
+  <!-- Boxes -->
+
+  <!-- User Input -->
+  <rect x="420" y="100" width="160" height="40" rx="20" fill="#1e293b" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)" />
+  <text x="500" y="125" fill="#f8fafc" font-size="14" font-weight="600" text-anchor="middle">User Prompt</text>
+
+  <!-- Orchestrator -->
+  <rect x="360" y="180" width="280" height="60" rx="8" fill="url(#grad-core)" stroke="#60a5fa" stroke-width="2" filter="url(#shadow)" />
+  <text x="500" y="205" fill="#ffffff" font-size="16" font-weight="bold" text-anchor="middle">Orchestrator</text>
+  <text x="500" y="225" fill="#bfdbfe" font-size="12" text-anchor="middle">ReAct Main Loop &amp; Replanning</text>
+
+  <!-- Ledger -->
+  <rect x="360" y="480" width="280" height="60" rx="8" fill="url(#grad-data)" stroke="#fcd34d" stroke-width="2" filter="url(#shadow)" />
+  <text x="500" y="505" fill="#ffffff" font-size="16" font-weight="bold" text-anchor="middle">Ledger (State Vault)</text>
+  <text x="500" y="525" fill="#fef3c7" font-size="12" text-anchor="middle">Append-only Interaction DB</text>
+
+  <!-- Sentinel -->
+  <rect x="130" y="180" width="160" height="60" rx="8" fill="url(#grad-core)" stroke="#60a5fa" stroke-width="2" filter="url(#shadow)" />
+  <text x="210" y="205" fill="#ffffff" font-size="16" font-weight="bold" text-anchor="middle">Sentinel</text>
+  <text x="210" y="225" fill="#bfdbfe" font-size="12" text-anchor="middle">Budget Interceptor</text>
+
+  <!-- LLM Client -->
+  <rect x="130" y="320" width="160" height="60" rx="8" fill="url(#grad-ext)" stroke="#c4b5fd" stroke-width="2" filter="url(#shadow)" />
+  <text x="210" y="345" fill="#ffffff" font-size="16" font-weight="bold" text-anchor="middle">Qwen 3 32B</text>
+  <text x="210" y="365" fill="#ede9fe" font-size="12" text-anchor="middle">Groq Inference Engine</text>
+
+  <!-- Tool Registry -->
+  <rect x="710" y="180" width="200" height="60" rx="8" fill="#1e293b" stroke="#94a3b8" stroke-width="2" filter="url(#shadow)" />
+  <text x="810" y="205" fill="#ffffff" font-size="16" font-weight="bold" text-anchor="middle">Tool Registry</text>
+  <text x="810" y="225" fill="#94a3b8" font-size="12" text-anchor="middle">Thread Pool Wrapper</text>
+
+  <!-- Tools Connections -->
+  <path d="M 810 240 L 810 260" stroke="#10b981" stroke-width="2" fill="none" />
+  
+  <path d="M 810 260 L 810 300" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrow)" />
+  <path d="M 810 260 L 810 380" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrow)" />
+  <path d="M 810 260 L 810 460" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrow)" />
+  
+
+  <!-- Tools vertically aligned -->
+  <rect x="730" y="300" width="160" height="50" rx="6" fill="url(#grad-tool)" stroke="#6ee7b7" stroke-width="1.5" filter="url(#shadow)" />
+  <text x="810" y="322" fill="#ffffff" font-size="14" font-weight="600" text-anchor="middle">AST Explorer</text>
+  <text x="810" y="338" fill="#a7f3d0" font-size="11" text-anchor="middle">Structural File Read</text>
+
+  <rect x="730" y="380" width="160" height="50" rx="6" fill="url(#grad-tool)" stroke="#6ee7b7" stroke-width="1.5" filter="url(#shadow)" />
+  <text x="810" y="402" fill="#ffffff" font-size="14" font-weight="600" text-anchor="middle">Web Search</text>
+  <text x="810" y="418" fill="#a7f3d0" font-size="11" text-anchor="middle">DuckDuckGo / DDGS</text>
+
+  <rect x="730" y="460" width="160" height="50" rx="6" fill="url(#grad-tool)" stroke="#6ee7b7" stroke-width="1.5" filter="url(#shadow)" />
+  <text x="810" y="482" fill="#ffffff" font-size="14" font-weight="600" text-anchor="middle">Code Subprocess</text>
+  <text x="810" y="498" fill="#a7f3d0" font-size="11" text-anchor="middle">Sandboxed Python</text>
+
+</svg>
