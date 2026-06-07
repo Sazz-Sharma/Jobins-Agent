@@ -1,33 +1,33 @@
 # Engineering Decisions
 
-This document records the specific engineering trade-offs made during development, following the format: *"I considered [X] but chose [Y] because [Z]."*
+This document records the core architectural and engineering trade-offs made during the development of this agent. Rather than framing every choice as a simple binary "A vs. B", these entries reflect how multiple competing approaches were evaluated to solve complex operational constraints, ultimately leading to the single most effective solution.
 
 ---
 
-**1. Custom Tool: ASTCodeMapExplorer vs. Raw File Reading**
+**1. Context Compression & Codebase Navigation**
 
-I considered allowing the agent to read source files entirely via terminal execution, but chose a custom **ASTCodeMapExplorer** because it programmatically maps out the codebase framework—extracting only classes, function signatures, docstrings, and line numbers—while completely stripping implementation bodies. This prevents adversarial tasks from drowning the agent's context window with thousands of lines of raw source code and preserves our strict $0.20 budget limit. A 5,000-line file designed to exhaust the budget gets safely distilled down to a ~20-line functional outline.
-
----
-
-**2. Append-Only Ledger + Interceptor Proxy vs. Mutable Global Budget Variable**
-
-I considered using a simple while loop with a mutable global variable for tracking token costs, but chose an **append-only Ledger State Model with an Interceptor Proxy (Sentinel)** because it guarantees that budget checking is deterministic, un-bypassable by adversarial prompts, and perfectly logs partial execution during an exception-driven graceful exit. The Sentinel wraps the LLM client and enforces guardrails *before* any request fires — the agent physically cannot reach the LLM without passing through the budget check first.
+When figuring out how the agent should read local files, I considered several approaches. I thought about building a full RAG (Retrieval-Augmented Generation) pipeline with vector embeddings to search code, or maybe an HTML link tree parser to scrape documentation. I also considered just letting the agent read raw `.py` files dumped straight into the prompt. Ultimately, I went with an **AST (Abstract Syntax Tree) code explorer**. Setting up RAG for a local sandbox is overkill, and raw file reads risk blowing up the token budget instantly. The AST explorer hits the perfect sweet spot: it allows the agent to navigate massive, 5,000-line Python files securely by distilling them down to their structural bones (classes, functions, docs) without risking prompt size exhaustion—plus it's incredibly fun to build.
 
 ---
 
-**3. Sandboxed Subprocess vs. Python's Native `exec()`/`eval()`**
+**2. State Management & Budget Tracking**
 
-I considered using Python's native `exec()` function for the code execution tool, but chose a **Sandboxed Subprocess Wrapper with strict timeouts** because it physically protects the agent process from being hung indefinitely by adversarial infinite loops or memory bombs. The code is written to a temporary file and executed via `subprocess.run()` with a 30-second timeout. If the subprocess hangs, `TimeoutExpired` is caught and control returns cleanly to the agent engine. The temp file is always cleaned up in a `finally` block.
-
----
-
-**4. State-Driven Reflection Node vs. Inline Error Retry**
-
-I considered allowing the LLM to process tool errors inside its main prompt context and retry the same action, but chose an **explicit State-Driven Reflection Node** with forced replanning because it prevents naive models from entering endless retry loops when facing broken tool targets or malicious code inputs. When the Progress Evaluator detects stalled progress (repeated observations or consecutive errors), it clears the conversation context and injects a dedicated Replanning Prompt that forces the model to analyze what went wrong and devise a completely different strategy before issuing any new action.
+To track the budget constraint and LLM calls, I looked at a few options. I could have spun up a quick SQLite database, or kept a running, mutable JSON payload in memory that updates as the agent navigates. Mutating state across deep ReAct loops makes debugging a total nightmare later on, and spinning up an external database adds unnecessary heavy dependencies. Emulating an **append-only transaction 'Ledger'**—similar to an event sourcing model—ended up being the most robust choice. It guarantees we have a perfect, chronological historical trace that we can dump out clearly during those "Graceful Exit" limit hits, ensuring we catch exactly when a specific fraction of a cent breaches the $0.20 limit organically without losing or overwriting tracking data.
 
 ---
 
-**5. Groq (Qwen 3 32B) with Mock Pricing vs. Direct Paid API**
+**3. Implementing Guardrails & Security**
 
-I considered using a paid API with real-time billing enforcement, but chose **Groq's hosted Qwen 3 32B model with simulated mock pricing** ($0.00075/1k input tokens, $0.0045/1k output tokens — mirroring GPT-5.4-mini pricing) because the assignment permits free hosted models with mock cost simulation. Groq provides extremely fast inference (sub-second responses) which makes the agent loop highly responsive. The Sentinel extracts real `prompt_tokens` and `completion_tokens` from the OpenAI-compatible response and computes mock costs, so the monetary budget guardrail functions identically to how it would with a paid model. Qwen 3's `<think>` reasoning tags are stripped in the LLM client layer before reaching the parser.
+It is standard practice to just throw an `if total_calls >= 10: break` check at the very top or bottom of the main orchestration loop. I also considered implementing post-action cost calculations where the agent checks its wallet *after* spending. However, wrapping the LLM directly behind a **"Sentinel" proxy interceptor** felt significantly more bulletproof than all of those. By placing the budget guardrail directly over the network interface layer, it is physically impossible for the orchestrator to accidentally squeeze out an 11th call, no matter how weird the internal Python execution gets, if a sub-loop spawns unexpectedly, or what exceptions are thrown elsewhere.
+
+---
+
+**4. Breaking Infinite ReAct Loops**
+
+When an agent hits a wall or executes bad syntax, the default approach is usually to zero-shot retry or just dump the raw `stderr` traceback back into the prompt hoping it self-corrects. While that works occasionally, naive models will predictably get stuck repeating the exact same bad string indefinitely. Instead of hoping for self-correction or simply killing the process entirely on an error, I built an **active stall detector and replanner**. If it notices consecutive repeated actions or repetitive failures, it actively intercepts the flow, wipes the immediate local tool context, and injects a hard 'replanning' prompt to completely force the agent to devise a fresh strategy from scratch.
+
+---
+
+**5. LLM Provider & Cost Modeling**
+
+For the brain of the agent, I evaluated several APIs. I was incredibly tempted to just use OpenRouter to tap into premium, ultra-reliable models like GPT-4o or Claude 3.5 Sonnet, mostly because they never fail strict ReAct formatting requirements and require zero hand-holding. However, sticking exclusively to **Groq with the open-source Qwen 3 32B model** (using mock pricing to simulate cost) felt like a much better engineering challenge. It forced me to actually build a robust parser that manually strips `<think>` tokens and natively handles format degradation when the model gets confused under pressure. It proves the architecture's guardrails and string manipulators hold up beautifully even if the LLM behaves unexpectedly, which makes the entire project inherently more resilient.
