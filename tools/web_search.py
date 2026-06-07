@@ -7,6 +7,8 @@ socket-level timeouts to prevent hanging on adversarial targets.
 
 from __future__ import annotations
 
+import warnings
+
 MAX_RESULTS = 5
 MAX_OUTPUT_CHARS = 1500
 DEFAULT_TIMEOUT = 5
@@ -40,10 +42,18 @@ class WebSearchTool:
             return "ERROR: No search query provided."
 
         try:
-            from ddgs import DDGS
+            try:
+                from ddgs import DDGS
+            except ImportError:
+                # Fallback for older docker containers without ddgs installed
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", category=RuntimeWarning)
+                    from duckduckgo_search import DDGS
 
-            with DDGS(timeout=self._timeout) as ddgs:
-                results = list(ddgs.text(query, max_results=MAX_RESULTS))
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=RuntimeWarning)
+                with DDGS(timeout=self._timeout) as ddgs:
+                    results = list(ddgs.text(query, max_results=MAX_RESULTS))
 
             if not results:
                 return f"No search results found for: {query}"

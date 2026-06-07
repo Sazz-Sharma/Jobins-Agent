@@ -97,7 +97,7 @@ class Orchestrator:
 
             # ── Phase 1: Budget Check ────────────────────────────────
             self._log(f"\n{'─'*60}")
-            self._log(f"  📍 TICK {tick} | {self._sentinel.budget_status}")
+            self._log(f"  TICK {tick} | {self._sentinel.budget_status}")
             self._log(f"{'─'*60}")
 
             # ── Phase 2: ReAct Tick (LLM call via Sentinel) ──────────
@@ -127,12 +127,12 @@ class Orchestrator:
 
             # ── Display Thought ──────────────────────────────────────
             if parsed.thought:
-                self._log(f"\n  💭 THOUGHT: {parsed.thought}")
+                self._log(f"\n  THOUGHT: {parsed.thought}")
                 self._ledger.append(EntryType.THOUGHT, parsed.thought)
 
             # ── Handle parse errors ──────────────────────────────────
             if parsed.parse_error:
-                self._log(f"\n  ⚠️  PARSE ERROR: {parsed.parse_error}")
+                self._log(f"\n  PARSE ERROR: {parsed.parse_error}")
                 self._ledger.append(EntryType.ERROR, parsed.parse_error)
                 # Feed the error back as an observation
                 self._messages.append({"role": "assistant", "content": llm_text})
@@ -154,7 +154,7 @@ class Orchestrator:
 
                 # ── Deduplication check ──────────────────────────────
                 if self._ledger.has_duplicate_action(action_key):
-                    self._log(f"\n  🔁 DUPLICATE ACTION BLOCKED: {action}")
+                    self._log(f"\n  DUPLICATE ACTION BLOCKED: {action}")
                     self._log(f"     Input: {action_input[:100]}")
                     self._ledger.append(
                         EntryType.ERROR,
@@ -179,10 +179,10 @@ class Orchestrator:
                 self._ledger.append(EntryType.ACTION, action_key)
 
                 # ── Phase 3: Tool Execution ──────────────────────────
-                self._log(f"\n  🔧 TOOL CALL: {action}")
+                self._log(f"\n  TOOL CALL: {action}")
                 self._log(f"     Input: {action_input[:200]}")
                 observation = self._tools.execute(action, action_input)
-                self._log(f"\n  📋 TOOL OUTPUT:")
+                self._log(f"\n  TOOL OUTPUT:")
                 for line in observation.split("\n"):
                     self._log(f"     {line}")
 
@@ -190,10 +190,10 @@ class Orchestrator:
                 self._ledger.append(EntryType.OBSERVATION, observation)
 
                 # ── Phase 4: Reflection — Progress Evaluation ────────
-                self._log(f"\n  🔍 REFLECTION:")
+                self._log(f"\n  REFLECTION:")
                 if self._is_stalled(observation):
                     self._stall_count += 1
-                    self._log(f"     ⚠️  Progress STALLED ({self._stall_count}/{MAX_STALLS})")
+                    self._log(f"     Progress STALLED ({self._stall_count}/{MAX_STALLS})")
                     self._log(f"     Reason: {'Same observation as last tick' if observation.strip() == (self._last_observation or '').strip() else 'Consecutive errors detected'}")
 
                     if self._stall_count >= MAX_STALLS:
@@ -202,7 +202,7 @@ class Orchestrator:
                         self._log(f"     → Will allow one more attempt before replanning")
                 else:
                     self._stall_count = 0  # Reset on progress
-                    self._log(f"     ✅ Making progress — stall counter reset")
+                    self._log(f"     Making progress — stall counter reset")
 
                 self._last_observation = observation
 
@@ -214,12 +214,12 @@ class Orchestrator:
             # ── Check for Final Answer (only if no action) ───────────
             if parsed.is_final:
                 self._ledger.append(EntryType.FINAL_ANSWER, parsed.final_answer or "")
-                self._log(f"\n  🏁 FINAL ANSWER: {parsed.final_answer}")
+                self._log(f"\n  FINAL ANSWER: {parsed.final_answer}")
                 self._log(f"\n{self._ledger.print_summary()}")
                 return parsed.final_answer or ""
 
             # ── Fallback: no action and no final answer ──────────────
-            self._log(f"\n  ⚠️  Could not extract Action or Final Answer from response:")
+            self._log(f"\n  Could not extract Action or Final Answer from response:")
             self._log(f"     Raw: {llm_text[:200]}...")
             self._messages.append({"role": "assistant", "content": llm_text})
             self._messages.append({
@@ -255,7 +255,7 @@ class Orchestrator:
     def _inject_replan(self, task: str) -> None:
         """Force a replanning frame when progress has stalled."""
         self._log(f"\n  {'='*56}")
-        self._log(f"  🔄 REPLANNING TRIGGERED")
+        self._log(f"  REPLANNING TRIGGERED")
         self._log(f"  {'='*56}")
         self._log(f"     Reason: Progress stalled ({self._stall_count} consecutive stalls)")
 
@@ -295,14 +295,14 @@ class Orchestrator:
             },
         ]
         self._stall_count = 0
-        self._log(f"     ✅ Replan complete — fresh context injected")
+        self._log(f"     Replan complete — fresh context injected")
         self._log(f"  {'='*56}\n")
 
     # ── Graceful Exit ────────────────────────────────────────────────────
 
     def _handle_budget_exceeded(self, exc: BudgetExceededException) -> str:
         """Handle budget exhaustion with a graceful exit report."""
-        self._log(f"\n🛑 {exc.reason}")
+        self._log(f"\n{exc.reason}")
         self._log("\n--- GRACEFUL EXIT: Budget Exhausted ---")
 
         # Build partial completion report
