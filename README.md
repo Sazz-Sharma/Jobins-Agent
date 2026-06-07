@@ -106,23 +106,13 @@ The current implementation routes all LLM calls through a single model (Qwen 3 3
 - Docker and Docker Compose
 - A Groq API key ([get one free at console.groq.com](https://console.groq.com))
 
-### Quick Start
+### Quick Start (One-Command Setup)
 
-1. **Clone and configure:**
-   ```bash
-   git clone <repo-url> && cd JoBins-Agent
-   cp .env.example .env
-   # Edit .env and set your GROQ_API_KEY
-   ```
+You can clone, configure, build, and run the agent using a single command. The setup script will automatically handle `.env` creation, prompt you for your Groq API key if you haven't set it, and cleanly pass your task straight into the Docker container.
 
-2. **Run with Docker (recommended):**
-   ```bash
-   # Interactive mode
-   docker compose run --rm agent
-
-   # Single task
-   docker compose run --rm agent --task "Calculate the first 20 Fibonacci numbers"
-   ```
+```bash
+git clone https://github.com/Sazz-Sharma/Jobins-Agent.git && cd Jobins-Agent && chmod +x start.sh && ./start.sh "Calculate the first 20 Fibonacci numbers"
+```
 
 3. **Run locally (alternative):**
    ```bash
