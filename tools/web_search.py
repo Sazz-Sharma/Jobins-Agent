@@ -40,7 +40,7 @@ class WebSearchTool:
             return "ERROR: No search query provided."
 
         try:
-            from duckduckgo_search import DDGS
+            from ddgs import DDGS
 
             with DDGS(timeout=self._timeout) as ddgs:
                 results = list(ddgs.text(query, max_results=MAX_RESULTS))
@@ -68,8 +68,8 @@ class WebSearchTool:
 
         except ImportError:
             return (
-                "ERROR: duckduckgo-search package not installed. "
-                "Run: pip install duckduckgo-search"
+                "ERROR: ddgs package not installed. "
+                "Run: pip install ddgs"
             )
         except TimeoutError:
             return (
