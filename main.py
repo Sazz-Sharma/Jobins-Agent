@@ -36,8 +36,8 @@ def build_agent(verbose: bool = True):
     max_calls = int(os.getenv("MAX_LLM_CALLS", "10"))
     max_budget = float(os.getenv("MAX_BUDGET_USD", "0.20"))
 
-    if not api_key:
-        print("ERROR: GROQ_API_KEY is not set.", file=sys.stderr)
+    if not api_key or api_key == "gsk-your-key-here":
+        print("ERROR: GROQ_API_KEY is not set or using the default placeholder.", file=sys.stderr)
         print("Set it in your .env file or as an environment variable.", file=sys.stderr)
         sys.exit(1)
 

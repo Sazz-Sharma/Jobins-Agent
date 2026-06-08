@@ -10,7 +10,7 @@ if [ ! -f .env ]; then
 fi
 
 # 2. Check and prompt for GROQ API KEY
-if grep -q "your_api_key_here" .env || ! grep -q "GROQ_API_KEY=" .env; then
+if grep -q "gsk-your-key-here" .env || ! grep -q "GROQ_API_KEY=" .env; then
     echo ""
     echo "🔑 Groq API Key is missing or set to default."
     echo "Get your free API key at: https://console.groq.com/keys"
