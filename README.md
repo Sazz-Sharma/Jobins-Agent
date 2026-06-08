@@ -4,7 +4,7 @@ A robust, budget-aware AI agent that operates under strict resource limits (**10
 
 > **Run with a single command:**
 > ```bash
-> docker compose run --rm agent --task "Your task here"
+> git clone https://github.com/Sazz-Sharma/Jobins-Agent.git && cd Jobins-Agent && chmod +x start.sh && ./start.sh "Your task here"
 > ```
 
 ---
